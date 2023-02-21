@@ -3,6 +3,7 @@ package com.ejerciciosarraylist.arraylist;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
+import java.util.HashMap;
 
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -199,6 +200,184 @@ public class ArraylistApplication {
   }
 
 
+
+
+
+
+  /*
+    /*Ejercicio
+  vamos a pedir al usuario que ingrese la cantidad alumnos a los cuales les asignará una nota,  luego de que ingrese la catidad de notas de cada alumnos, se va a desplegar un menú.
+  las opciones del menú serán la siguentes:
+  1.- mostrar el promedio de notas
+  2.- mostrar si la nota es aprobatoria o reprobatoria
+  3.- mostrar si la nota está por sobre o por debajo del promedio del curso
+ 
+   
+   */
+
+   public static void menuOpciones(){
+    Scanner sc = new Scanner(System.in);
+
+    int cantidadAlumnos;    
+    int cantidadNotas;
+
+    do{
+      System.out.print("Ingrese la cantidad de alumnos: ");
+      cantidadAlumnos = sc.nextInt(); 
+      if(cantidadAlumnos < 1 || cantidadAlumnos > 5){
+        System.out.println("El rango de alumnos es de 1 a 5");
+      }
+    }while(cantidadAlumnos < 1 || cantidadAlumnos > 5);
+
+    do{
+      System.out.print("Ingrese la cantidad de notas por alumno: ");
+      cantidadNotas = sc.nextInt();
+      if(cantidadNotas < 1 || cantidadNotas > 5){
+        System.out.println("la cantidad de notas es de 1 a 5");
+      }
+    }while(cantidadNotas < 1 || cantidadNotas > 5);
+
+    HashMap<String,ArrayList<Double>> alumnos = new HashMap<String,ArrayList<Double>>();
+    double promedioCurso = 0;
+    double notaAprobatoria = 4.0;
+
+    for(int i = 0; i < cantidadAlumnos; i++){
+      ArrayList<Double> notasAlumno = new ArrayList<Double>();
+      //notasAlumno.clear();
+      /* Desafío, verificar donde debería o como debería limpiar el arreglo para que funcione con la declaración de manera global */
+
+      sc.nextLine();//Esto es para borrar un espacio que se genera al presionar ENTER -> 3 = 3\n
+      //en la lectura del scanner queda guardado \n, por eso hay que ocupar sc.nextLine para "borrar" el residuo,
+      //este problema pasa cuando ocupo el Scanner con un int o Double y luego quiero ocupar un String
+      System.out.print("Ingrese el Nombre del Alumno: ");
+      String nombreAlumno = sc.nextLine();
+      
+      //System.out.print("Ingrese la cantidad de Notas del Alumno '"+nombreAlumno+"': ");
+      //int cantidadNotas = sc.nextInt();
+      
+      for(int j = 0; j < cantidadNotas; j++){
+        double nota;
+        do{
+          System.out.print("Ingrese la nota n°"+(j+1)+" de "+nombreAlumno+": ");
+          nota = sc.nextDouble();
+          if(nota < 1 || nota > 7){
+            System.out.println("Error: la nota debe ser de 1 a 7");
+          }
+
+        }while(nota < 1 || nota > 7);
+        
+        notasAlumno.add(nota);
+      }
+      alumnos.put(nombreAlumno, notasAlumno);
+    }
+    //1.-Mostrar notas
+    HashMap<String,Double> promediosAlumnos = new HashMap<String,Double>(calcularPromediosAlumnos(alumnos));
+    promedioCurso = calcularPromedioCurso(promediosAlumnos);
+
+    int opcion = 0;
+    do{
+      
+      do{
+        System.out.println("-------------- Menú --------------");
+        System.out.println("1.- Mostrar Notas de los Alumnos");
+        System.out.println("2.- Mostrar si la nota del promedio de cada alumno es Aprobatoria o Reprobatoria");
+        System.out.println("3.- Mostrar si la nota está bajo, sobre o igual al promedio del curso");
+        System.out.println("0.- Salir");
+        System.out.println("----------------------------------");
+        opcion = sc.nextInt();
+
+        if(opcion == 1){
+          //System.out.println(alumnos);
+          //System.out.println(promediosAlumnos);
+          mostrarNotasAlumnos(alumnos);
+        }else if(opcion == 2){
+          calcularNotaAprobatoria(promediosAlumnos, notaAprobatoria);
+        }else if(opcion == 3){
+          calcularSobrePromedioCurso(promediosAlumnos, promedioCurso);
+        }else if(opcion == 0){
+          System.out.println("Hasta pronto!");
+        }else{
+          System.out.println("ERROR: Ingresa una opción válida");
+        }
+
+      }while(opcion < 0 || opcion > 3);
+
+    }while(opcion != 0);
+
+
+    sc.close();
+   }
+
+  public static void mostrarNotasAlumnos(HashMap<String,ArrayList<Double>> alumnos){
+    for(String alumno : alumnos.keySet()){
+      System.out.println("--------------------------");
+      System.out.println(alumno);
+      System.out.println("--------------------------");
+      ArrayList<Double> notas = alumnos.get(alumno);
+      for(int i = 0; i < notas.size(); i++){
+        System.out.println(notas.get(i));
+      }
+      System.out.println("--------------------------");
+    }
+  }
+
+  public static void calcularNotaAprobatoria(HashMap<String,Double> promediosAlumnos,Double notaAprobatoria){
+    for(String alumno : promediosAlumnos.keySet()){
+      Double nota = promediosAlumnos.get(alumno);
+      if(nota >= notaAprobatoria){
+        System.out.println(alumno+" : " + nota + " -> Aprobado");
+      }else{
+        System.out.println(alumno+" : " + nota + " -> Reprobado");
+      }
+    }
+  }
+
+  public static void calcularSobrePromedioCurso(HashMap<String,Double> promediosAlumnos, Double promedioCurso){
+    for(String alumno : promediosAlumnos.keySet()){
+      Double nota = promediosAlumnos.get(alumno);
+      if(nota > promedioCurso){
+        System.out.println(alumno+" : " + nota + " -> Superior al Promedio del Curso: "+promedioCurso);
+      }else if(nota == promedioCurso){
+        System.out.println(alumno+" : " + nota + " -> Igual al Promedio del Curso : "+promedioCurso);
+      }else{
+        System.out.println(alumno+" : " + nota + " -> Inferior al Promedio del Curso : "+promedioCurso);
+      }
+    }
+  }
+
+  public static Double calcularPromedioAlumno(ArrayList<Double> notas){
+    Double promedioAlumno = 0.0;
+    for(int i = 0; i < notas.size();i++){
+      promedioAlumno += notas.get(i);
+    }
+    return promedioAlumno/notas.size();
+  }
+
+  public static HashMap<String,Double> calcularPromediosAlumnos(HashMap<String,ArrayList<Double>> alumnos){
+    HashMap<String,Double> promediosAlumnos = new HashMap<String,Double>();
+    Double promedioAlumno = 0.0;
+    
+    for(String alumno : alumnos.keySet()){
+      ArrayList<Double> notas = new ArrayList<Double>(alumnos.get(alumno));
+      promedioAlumno = calcularPromedioAlumno(notas);
+
+      promediosAlumnos.put(alumno, promedioAlumno);
+    }
+    
+    return promediosAlumnos;
+  }
+
+  public static Double calcularPromedioCurso(HashMap<String,Double> promediosAlumnos){
+    Double promedioCurso = 0.0;
+
+    for(String alumno : promediosAlumnos.keySet()){
+      promedioCurso += promediosAlumnos.get(alumno);
+    }
+    promedioCurso /= promediosAlumnos.size();
+
+    return promedioCurso;
+  }
+
 	public static void main(String[] args) {
 		//--------- Ejercicio 1 ---------
     //mostrarArrayList();
@@ -237,7 +416,10 @@ public class ArraylistApplication {
 
 
     //--------- Ejercicio 8 ---------
-    multiplos();
+    //multiplos();
+
+
+    menuOpciones();
 	}
 
 }
